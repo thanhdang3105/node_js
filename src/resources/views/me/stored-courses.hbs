@@ -1,51 +1,53 @@
-<div class="mt-4">
+<form method="post" action="/courses/handle-form-actions" class="mt-4" name="container-form">
     <div style="display:flex;justify-content:space-between;align-items:center;">
-        <h1>Khoá học của tôi</h1>
-        <a href="/me/trash/courses">Thùng rác</a>
+        <h1>Khoá học của tôi
+            <a href="/courses/create" title="Đăng khoá học">+</a>
+        </h1>
+        <a href="/me/trash/courses">Thùng rác ({{deletedCount}})</span></a>
     </div>
-    {{!-- <div class="row">
-        {{#each course}}
-        <div class="col-sm-6 col-lg-4">
-            <div class="card" style="width: 18rem;">
-                <a href="/courses/{{this.slug}}">
-                    <img class="card-img-top" src="{{this.image}}" alt="{{this.name}}">
-                </a>
-                <div class="card-body">
-                    <a href="/courses/{{this.slug}}">
-                        <h5 class="card-title">{{this.name}}</h5>
-                    </a>
-                    <p class="card-text">{{this.description}}</p>
-                    <a href="#" class="btn btn-primary">Update</a>
-                </div>
-            </div>
+    <div class="mt-4 d-flex align-items-center mb-4" style="gap :20px;">
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="checkbox_all">
+            <label class="form-check-label" for="checkbox_all">
+                Chọn tất cả
+            </label>
         </div>
-        {{/each}}
-    </div> --}}
+        <select class="form-control form-control-sm select-all-options" name="actions" required>
+            <option value="">-- Chọn hành động --</option>
+            <option value="delete">Xoá nhiều</option>
+            <option value="test">Test nhiều</option>
+        </select>
+
+        <button class="btn btn-primary btn-sm" id="btn-deleteMany" data-toggle="modal"
+                disabled data-target="#deleteMany-course">Thực hiện</button>
+    </div>
     <table class="table">
         <thead>
             <tr>
+                <th scope="col"></th>
                 <th scope="col">STT</th>
                 <th scope="col">Tên khoá học</th>
-                <th scope="col">Trình độ</th>
                 <th scope="col" colspan="2">Thời gian tạo</th>
             </tr>
         </thead>
         {{#each course}}
-        <form method="post" action="/courses/create">
             <tbody>
                 <tr>
-                    <th scope="row">{{sum @index 1}}</th>
-                    <td class="course_name">{{this.name}}</td>
-                    <td>{{this.level}}</td>
+                    <th scope="row">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="courseIds[]" value="{{this._id}}">
+                        </div>
+                    </th>
+                    <td class="course_name">{{sum @index 1}}</td>
+                    <td>{{this.name}}</td>
                     <td>{{this.createdAt}}</td>
                     <td>
                         <a href="/courses/{{this._id}}/edit">Sửa</a>
-                        <a href="" data-id="{{this._id}}" class="danger" data-toggle="modal"
+                        <a href="" data-id="{{this._id}}" data-toggle="modal"
                             data-target="#delete-course">Xoá</a>
                     </td>
                 </tr>
             </tbody>
-        </form>
         {{else}}
         <tr>
             <td colspan="5" class="text-center">
@@ -55,7 +57,7 @@
         </tr>
         {{/each}}
     </table>
-</div>
+</form>
 
 {{!-- form delete--}}
 <form name="delete-course-form" method="post"></form>
@@ -82,11 +84,36 @@
     </div>
 </div>
 
+<div class="modal fade" id="deleteMany-course" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Xoá khoá học</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn chắc chắn muốn xoá nhiều khoá học ???</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger deleteMany-course">Yes</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         var courseId
         var deleteForm = document.forms['delete-course-form']
+        var containerForm = document.forms['container-form']
         var btn_delete = document.querySelector('.delete-course')
+        var submit_deleteMany = document.querySelector('.deleteMany-course')
+        var checkboxAll = $('#checkbox_all')
+        var checkboxItems = $('input[name="courseIds[]"]')
+        var btn_deleteMany = document.getElementById('btn-deleteMany')
 
         $('#delete-course').on('show.bs.modal', function (event) {
             var button = $(event.relatedTarget)
@@ -96,6 +123,50 @@
         btn_delete.onclick = function () {
             deleteForm.action = `/courses/${courseId}?_method=delete`
             deleteForm.submit()
+        }
+
+        //check all or uncheck all when clicked
+        checkboxAll.change(function () {
+            let ischeckedAll = $(this).prop('checked')
+            checkboxItems.prop('checked', ischeckedAll)
+            renderCheckAllSubmitBtn()
+            
+        })
+
+        //checkboxItems clicked
+        checkboxItems.change(function () {
+            let ischecked = checkboxItems.length === $('input[name="courseIds[]"]:checked').length
+            checkboxAll.prop('checked', ischecked)
+            renderCheckAllSubmitBtn()
+        })
+
+        //re-render check all submit btn
+        function renderCheckAllSubmitBtn() {
+            var checkedCount = $('input[name="courseIds[]"]:checked').length
+            console.log()
+            if(checkedCount > 0){
+                btn_deleteMany.disabled = false
+            }
+            else{
+                btn_deleteMany.disabled = true
+            }
+        }
+
+        btn_deleteMany.onclick = function(e) {
+            e.preventDefault()
+            var button = $(e.target)
+            if($('select[name="actions"]')[0].value == ""){
+                button.removeAttr('data-target')
+                alert('Vui lòng chọn hành động!!')
+            }
+            else{
+                button.attr('data-target','#deleteMany-course')
+            }
+            
+        } 
+
+        submit_deleteMany.onclick = function () {
+            containerForm.submit()
         }
 
     })

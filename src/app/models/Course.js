@@ -31,6 +31,9 @@ const Course = new Schema({
     type: String,
     maxlength: 255
   },
+  deleted: {
+    type: Boolean,
+  }
 }, {
   timestamps: true,
 });

@@ -5,14 +5,30 @@ const {
 } = require('../../util/mongoose')
 
 class MeController {
+
+
     //[Get] /me/stored/courses
     storedCourses(req, res, next) {
-
-        Course.find({})
-            .then(course => res.render('me/stored-courses', {
-                course: mutipleMongoosetoObject(course),
-            }))
+        Promise.all([Course.find({}),Course.countDocumentsDeleted()])
+            .then(([course,deletedCount]) => {
+                res.render('me/stored-courses', {
+                    course: mutipleMongoosetoObject(course),
+                    deletedCount,
+                })
+            })
             .catch(next)
+
+        // Course.countDocuments()
+        //     .then(courseCount => {
+
+        //     })
+        //     .catch(next)
+
+        // Course.find({})
+        //     .then(course => res.render('me/stored-courses', {
+        //         course: mutipleMongoosetoObject(course),
+        //     }))
+        //     .catch(next)
     }
 
     //[Get] /course/create

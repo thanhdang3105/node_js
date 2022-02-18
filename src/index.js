@@ -13,7 +13,7 @@ const port = 3000
 
 const routes = require('./routes')
 const db = require('./config/db')
-// app.use(express.static(path.join(__dirname, 'public')))  
+app.use(express.static(path.join(__dirname, 'public')))  
 
 db.connect()
 

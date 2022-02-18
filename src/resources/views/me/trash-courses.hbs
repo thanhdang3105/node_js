@@ -27,7 +27,7 @@
                 <th scope="col">STT</th>
                 <th scope="col">Tên khoá học</th>
                 <th scope="col">Trình độ</th>
-                <th scope="col" colspan="2">Thời gian tạo</th>
+                <th scope="col" colspan="2">Thời gian xoá</th>
             </tr>
         </thead>
         {{#each course}}
@@ -37,9 +37,9 @@
                     <th scope="row">{{sum @index 1}}</th>
                     <td class="course_name">{{this.name}}</td>
                     <td>{{this.level}}</td>
-                    <td>{{this.createdAt}}</td>
+                    <td>{{this.deletedAt}}</td>
                     <td>
-                        <a href="/courses/{{this._id}}/edit">Khôi phục</a>
+                        <a href="" class="btn-restore" data-id="{{this._id}}">Khôi phục</a>
                         <a href="" data-id="{{this._id}}" class="danger" data-toggle="modal"
                             data-target="#delete-course">Xoá</a>
                     </td>
@@ -86,6 +86,7 @@
         var courseId
         var deleteForm = document.forms['delete-course-form']
         var btn_delete = document.querySelector('.delete-course')
+        var btn_restore = $('.btn-restore')
 
         $('#delete-course').on('show.bs.modal', function (event) {
             var button = $(event.relatedTarget)
@@ -93,9 +94,17 @@
         })
 
         btn_delete.onclick = function () {
-            deleteForm.action = `/courses/${courseId}?_method=delete`
+            deleteForm.action = `/courses/${courseId}/force?_method=delete`
             deleteForm.submit()
         }
+
+        btn_restore.click(function (e) {
+            e.preventDefault()
+
+            var id =$(this).data("id")
+            deleteForm.action = `/courses/${id}/restore?_method=patch`
+            deleteForm.submit()
+        })
 
     })
 </script>

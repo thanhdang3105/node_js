@@ -6,7 +6,6 @@ class SiteController {
 
     //[Get] /news
     index(req, res, next) {
-
         Course.find({})
             .then(courses => {
                 res.render('home', {
