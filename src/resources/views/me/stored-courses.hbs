@@ -6,48 +6,46 @@
         <a href="/me/trash/courses">Thùng rác ({{deletedCount}})</span></a>
     </div>
     <div class="mt-4 d-flex align-items-center mb-4" style="gap :20px;">
-        <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="checkbox_all">
-            <label class="form-check-label" for="checkbox_all">
-                Chọn tất cả
-            </label>
-        </div>
         <select class="form-control form-control-sm select-all-options" name="actions" required>
             <option value="">-- Chọn hành động --</option>
             <option value="delete">Xoá nhiều</option>
             <option value="test">Test nhiều</option>
         </select>
 
-        <button class="btn btn-primary btn-sm" id="btn-deleteMany" data-toggle="modal"
-                disabled data-target="#deleteMany-course">Thực hiện</button>
+        <button class="btn btn-primary btn-sm" id="btn-deleteMany" data-toggle="modal" disabled>Thực hiện</button>
     </div>
     <table class="table">
         <thead>
             <tr>
-                <th scope="col"></th>
-                <th scope="col">STT</th>
-                <th scope="col">Tên khoá học</th>
-                <th scope="col" colspan="2">Thời gian tạo</th>
+                <th scope="col">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="checkbox_all">
+                        <label class="form-check-label" for="checkbox_all"></label>
+                    </div>
+                </th>
+                <th scope="col">ID {{{sortable '_id' _sort}}}</th>
+                <th scope="col" class="d-flex align-items-center" style="gap:10px;color:black;height:100%;">Tên khoá học
+                    {{{sortable 'name' _sort}}}</th>
+                <th scope="col" colspan="2">Thời gian tạo {{{sortable 'createdAt' _sort}}}</th>
             </tr>
         </thead>
         {{#each course}}
-            <tbody>
-                <tr>
-                    <th scope="row">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="courseIds[]" value="{{this._id}}">
-                        </div>
-                    </th>
-                    <td class="course_name">{{sum @index 1}}</td>
-                    <td>{{this.name}}</td>
-                    <td>{{this.createdAt}}</td>
-                    <td>
-                        <a href="/courses/{{this._id}}/edit">Sửa</a>
-                        <a href="" data-id="{{this._id}}" data-toggle="modal"
-                            data-target="#delete-course">Xoá</a>
-                    </td>
-                </tr>
-            </tbody>
+        <tbody>
+            <tr>
+                <th scope="row">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="courseIds[]" value="{{this._id}}">
+                    </div>
+                </th>
+                <th scope="row">{{this._id}}</th>
+                <td>{{this.name}}</td>
+                <td>{{this.createdAt}}</td>
+                <td>
+                    <a href="/courses/{{this._id}}/edit">Sửa</a>
+                    <a href="" data-id="{{this._id}}" data-toggle="modal" data-target="#delete-course">Xoá</a>
+                </td>
+            </tr>
+        </tbody>
         {{else}}
         <tr>
             <td colspan="5" class="text-center">
@@ -130,7 +128,7 @@
             let ischeckedAll = $(this).prop('checked')
             checkboxItems.prop('checked', ischeckedAll)
             renderCheckAllSubmitBtn()
-            
+
         })
 
         //checkboxItems clicked
@@ -143,27 +141,25 @@
         //re-render check all submit btn
         function renderCheckAllSubmitBtn() {
             var checkedCount = $('input[name="courseIds[]"]:checked').length
-            console.log()
-            if(checkedCount > 0){
+            if (checkedCount > 0) {
                 btn_deleteMany.disabled = false
             }
-            else{
+            else {
                 btn_deleteMany.disabled = true
             }
         }
 
-        btn_deleteMany.onclick = function(e) {
-            e.preventDefault()
+        btn_deleteMany.onclick = function (e) {
             var button = $(e.target)
-            if($('select[name="actions"]')[0].value == ""){
-                button.removeAttr('data-target')
-                alert('Vui lòng chọn hành động!!')
+            if ($('select[name="actions"]')[0].value == "") {
+
             }
-            else{
-                button.attr('data-target','#deleteMany-course')
+            else {
+                e.preventDefault()
+                button.attr('data-target', '#deleteMany-course')
             }
-            
-        } 
+
+        }
 
         submit_deleteMany.onclick = function () {
             containerForm.submit()

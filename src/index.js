@@ -17,12 +17,16 @@ app.use(express.static(path.join(__dirname, 'public')))
 
 db.connect()
 
+const SortMiddleware = require('./app/middlewares/SortMiddleware')
+
 app.use(express.urlencoded({
   extended: true
 }))
 app.use(express.json())
 
 app.use(methodOverride('_method'))
+
+app.use(SortMiddleware)
 //XMLHttpRequest, fecth, axios
 //http logger
 // app.use(morgan('combined'))
@@ -32,6 +36,26 @@ app.engine('hbs', handlebars.engine({
   extname: '.hbs',
   helpers: {
     sum: (a, b) => a + b,
+    sortable: (field, sort) =>{
+      const sortType = field === sort.column ? sort.type : 'default'
+
+      const icons = {
+        default: 'oi oi-elevator',
+        asc: 'oi oi-caret-top',
+        desc: 'oi oi-caret-bottom',
+      }
+
+      const types = {
+        default: 'desc',
+        asc: 'desc',
+        desc: 'asc',
+      }
+
+      const icon = icons[sortType]
+      const type = types[sortType]
+
+      return `<a href="?_sort&column=${field}&type=${type}" class="${icon}"></a>`
+    }
   }
 }));
 app.set('view engine', 'hbs');

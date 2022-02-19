@@ -100,15 +100,38 @@ class CourseController {
 
     //[Post] /course/store
     store(req, res, next) {
-        const formData = {
-            ...req.body
-        }
-        formData.image = `http://img.youtube.com/vi/${req.body.video_id}/sddefault.jpg`
-        const course = new Course(formData)
+        req.body.image = `http://img.youtube.com/vi/${req.body.video_id}/sddefault.jpg`
+        const course = new Course(req.body)
         course.save(err => {
             if (err) return next
             res.redirect('/me/stored/courses')
         })
+    }
+
+    trashActions(req, res, next) {
+        switch (req.body.actions) {
+            case 'delete':
+                Course.deleteMany({
+                        _id: { $in: req.body.deletedIds }
+                    })
+                    .then(() => {
+                        res.redirect('back')
+                    })
+                    .catch(next)
+                break
+            case 'restore':
+                Course.restore({
+                    _id: { $in: req.body.deletedIds }
+                })
+                .then(() => {
+                    res.redirect('back')
+                })
+                .catch(next)
+                break
+            default :
+                    res.json({message: 'Actions Invalid'})
+                    break
+        }
     }
 }
 
